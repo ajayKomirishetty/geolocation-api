@@ -12,5 +12,8 @@ class CreateGeolocations < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
+
+    add_index :geolocations, :ip_address, unique: true
+    add_index :geolocations, :url, unique: true
   end
 end

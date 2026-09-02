@@ -22,7 +22,10 @@ default: &default
 
 development:
   <<: *default
-  database: geolocation_api_development
+  database: <%= ENV.fetch("DATABASE_NAME", "geolocation_api_development") %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "postgres") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "postgres") %>
+  host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
@@ -56,7 +59,10 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: geolocation_api_test
+  database: <%= ENV.fetch("DATABASE_TEST_NAME", "geolocation_api_test") %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "postgres") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "postgres") %>
+  host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -85,20 +91,8 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
-    <<: *default
-    database: geolocation_api_production
-    username: geolocation_api
-    password: <%= ENV["GEOLOCATION_API_DATABASE_PASSWORD"] %>
-  cache:
-    <<: *primary_production
-    database: geolocation_api_production_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *primary_production
-    database: geolocation_api_production_queue
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *primary_production
-    database: geolocation_api_production_cable
-    migrations_paths: db/cable_migrate
+  <<: *default
+  database: <%= ENV.fetch("DATABASE_NAME", "geolocation_api_production") %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "postgres") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "postgres") %>
+  host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
