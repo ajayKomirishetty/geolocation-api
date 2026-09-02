@@ -55,3 +55,7 @@ group :development, :test do
   gem "faker"
   gem "dotenv-rails"
 end
+
+group :test do
+  gem "webmock"
+end
