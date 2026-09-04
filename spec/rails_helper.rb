@@ -2,6 +2,7 @@
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 ENV['API_TOKEN'] = 'test-api-token'
+ENV['IPSTACK_API_KEY'] = 'test-ipstack-api-key'
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
