@@ -11,7 +11,10 @@ module GeolocationService
 
         existing = Geolocation.find_by(ip_address: ip_address)
 
-        return existing if existing
+        if existing
+          existing.update!(url: url) if url.present? && existing.url.blank?
+          return existing
+        end
 
         location = @provider.lookup(ip_address)
 
@@ -25,6 +28,8 @@ module GeolocationService
           longitude: location[:longitude],
           provider: provider_name
         )
+      rescue ActiveRecord::RecordNotUnique
+        Geolocation.find_by!(ip_address: ip_address)
       end
 
       private

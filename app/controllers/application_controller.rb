@@ -5,11 +5,9 @@ class ApplicationController < ActionController::API
 
     def authenticate_request
       token = request.headers["Authorization"]&.delete_prefix("Bearer ")
+      expected_token = ENV["API_TOKEN"].to_s
 
-      unless ActiveSupport::SecurityUtils.secure_compare(
-        token.to_s,
-        ENV.fetch("API_TOKEN", "")
-      )
+      if expected_token.blank? || token.blank? || !ActiveSupport::SecurityUtils.secure_compare(token, expected_token)
         render json: {
           error: "Unauthorized"
         }, status: :unauthorized

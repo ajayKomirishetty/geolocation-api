@@ -5,6 +5,8 @@ require "uri"
 module GeolocationService
   class IpstackProvider < Provider
     BASE_URL = "http://api.ipstack.com"
+    OPEN_TIMEOUT_SECONDS = 5
+    READ_TIMEOUT_SECONDS = 10
 
     def initialize(api_key:)
       @api_key = api_key
@@ -14,6 +16,11 @@ module GeolocationService
       response = make_request(ip_address)
 
       parse_response(response)
+    rescue Net::OpenTimeout, Net::ReadTimeout, Net::WriteTimeout, Timeout::Error
+      raise ProviderTimeout, "Ipstack request timed out"
+    rescue SocketError, EOFError, Errno::ECONNREFUSED, Errno::ECONNRESET,
+           Errno::EHOSTUNREACH, Errno::ENETUNREACH
+      raise ProviderError, "Unable to reach Ipstack"
     end
 
     private
@@ -28,7 +35,14 @@ module GeolocationService
 
       uri.query = URI.encode_www_form(params)
 
-      Net::HTTP.get_response(uri)
+      Net::HTTP.start(
+        uri.host,
+        uri.port,
+        use_ssl: uri.scheme == "https",
+        open_timeout: OPEN_TIMEOUT_SECONDS,
+        read_timeout: READ_TIMEOUT_SECONDS,
+        write_timeout: READ_TIMEOUT_SECONDS
+      ) { |http| http.request(Net::HTTP::Get.new(uri)) }
     end
 
     def parse_response(response)

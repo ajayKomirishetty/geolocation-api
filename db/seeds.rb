@@ -4,6 +4,13 @@
 #
 # Example:
 #
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+unless Rails.env.test?
+  Geolocation.find_or_create_by!(ip_address: "8.8.8.8") do |geolocation|
+    geolocation.country = "United States"
+    geolocation.region = "California"
+    geolocation.city = "Mountain View"
+    geolocation.latitude = 37.386
+    geolocation.longitude = -122.0838
+    geolocation.provider = "seed"
+  end
+end

@@ -1,6 +1,10 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  # Docker deployments provide SECRET_KEY_BASE directly and do not need the
+  # repository owner's private Rails credentials key.
+  config.require_master_key = false
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.

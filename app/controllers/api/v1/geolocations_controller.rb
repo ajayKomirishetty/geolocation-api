@@ -10,7 +10,14 @@ module Api
       rescue_from GeolocationService::ProviderError,
                   with: :render_provider_error
 
+      rescue_from GeolocationService::ProviderTimeout,
+                  with: :render_provider_timeout
+
+      rescue_from ActiveRecord::RecordInvalid,
+                  with: :render_record_invalid
+
       def index
+        validate_lookup_query!
         geolocation = find_geolocation
 
         if geolocation
@@ -63,6 +70,18 @@ module Api
         end
       end
 
+      def validate_lookup_query!
+        if params[:ip].blank? && params[:url].blank?
+          raise GeolocationService::ValidationError,
+                "Provide either ip or url"
+        end
+
+        return unless params[:ip].present? && params[:url].present?
+
+        raise GeolocationService::ValidationError,
+              "Provide either ip or url, not both"
+      end
+
       def render_not_found
         render json: {
           error: "Geolocation not found"
@@ -79,6 +98,18 @@ module Api
         render json: {
           error: error.message
         }, status: :bad_gateway
+      end
+
+      def render_provider_timeout(error)
+        render json: {
+          error: error.message
+        }, status: :gateway_timeout
+      end
+
+      def render_record_invalid(error)
+        render json: {
+          error: error.record.errors.full_messages.to_sentence
+        }, status: :unprocessable_entity
       end
     end
   end

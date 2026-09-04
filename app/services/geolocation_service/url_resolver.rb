@@ -1,14 +1,19 @@
 require "uri"
 require "resolv"
+require "timeout"
 
 module GeolocationService
   class UrlResolver
+    RESOLUTION_TIMEOUT_SECONDS = 5
+
     def self.resolve(url)
       hostname = normalize(url)
 
-      Resolv.getaddress(hostname)
+      Timeout.timeout(RESOLUTION_TIMEOUT_SECONDS) { Resolv.getaddress(hostname) }
     rescue Resolv::ResolvError
       raise ValidationError, "Unable to resolve URL"
+    rescue Timeout::Error
+      raise ValidationError, "URL resolution timed out"
     end
 
     def self.normalize(url)

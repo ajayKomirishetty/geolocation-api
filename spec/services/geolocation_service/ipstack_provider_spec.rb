@@ -47,4 +47,13 @@ RSpec.describe GeolocationService::IpstackProvider do
       GeolocationService::ProviderError
     )
   end
+
+  it "raises ProviderTimeout when ipstack times out" do
+    stub_request(:get, %r{api\.ipstack\.com/8\.8\.8\.8})
+      .to_timeout
+
+    expect {
+      provider.lookup("8.8.8.8")
+    }.to raise_error(GeolocationService::ProviderTimeout, "Ipstack request timed out")
+  end
 end

@@ -7,6 +7,11 @@ services:
       POSTGRES_DB: geolocation_api_production
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d geolocation_api_production"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   web:
     build: .
@@ -20,9 +25,10 @@ services:
       DATABASE_NAME: geolocation_api_production
       IPSTACK_API_KEY: ${IPSTACK_API_KEY}
       API_TOKEN: ${API_TOKEN}
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

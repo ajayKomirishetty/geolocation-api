@@ -128,7 +128,7 @@ Configure the required values:
 ```text
 IPSTACK_API_KEY=your_ipstack_api_key
 API_TOKEN=your_long_random_api_token
-RAILS_MASTER_KEY=your_rails_master_key
+SECRET_KEY_BASE=your_long_random_rails_secret
 ```
 
 Never commit `.env` to source control.
@@ -146,6 +146,8 @@ http://localhost:3000
 ```
 
 The Docker entrypoint prepares the database during startup.
+It also loads an idempotent demo geolocation for `8.8.8.8`, so the read API
+can be exercised immediately without consuming a provider request.
 
 ## 4. Verify authentication
 
@@ -178,7 +180,7 @@ curl http://localhost:3000/api/v1/geolocations \
 |---|---|---|
 | `IPSTACK_API_KEY` | Yes | API key used to communicate with ipstack |
 | `API_TOKEN` | Yes | Bearer token required by the application API |
-| `RAILS_MASTER_KEY` | Yes for production Docker | Allows Rails to decrypt encrypted credentials |
+| `SECRET_KEY_BASE` | Yes for production Docker | Rails cryptographic secret; generate with `openssl rand -hex 64` |
 | `DATABASE_HOST` | Docker | PostgreSQL hostname |
 | `DATABASE_USERNAME` | Docker | PostgreSQL username |
 | `DATABASE_PASSWORD` | Docker | PostgreSQL password |
@@ -189,7 +191,7 @@ Example:
 ```text
 IPSTACK_API_KEY=your-key
 API_TOKEN=your-secure-token
-RAILS_MASTER_KEY=your-master-key
+SECRET_KEY_BASE=your-long-random-rails-secret
 ```
 
 ### Security
@@ -398,6 +400,17 @@ Successful deletion returns:
 ```http
 204 No Content
 ```
+
+## Run the test suite
+
+With PostgreSQL available locally:
+
+```bash
+RAILS_ENV=test bin/rails db:prepare
+bundle exec rspec
+```
+
+The GitHub Actions test job runs the same RSpec suite against PostgreSQL.
 
 ---
 
@@ -854,7 +867,7 @@ Sensitive values include:
 ```text
 IPSTACK_API_KEY
 API_TOKEN
-RAILS_MASTER_KEY
+SECRET_KEY_BASE
 DATABASE_PASSWORD
 ```
 
